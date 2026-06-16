@@ -7,23 +7,23 @@ Callister Studio is an open-source desktop workbench for **debugging, testing, v
 
 ## Tech stack (target)
 
-| Layer | Choice |
-|-------|--------|
-| Desktop | Electron 33+ |
-| Build | electron-vite + TypeScript |
-| UI | React 18 + Tailwind + shadcn/ui |
-| State | Zustand + TanStack Query |
+| Layer       | Choice                                         |
+| ----------- | ---------------------------------------------- |
+| Desktop     | Electron 33+                                   |
+| Build       | electron-vite + TypeScript                     |
+| UI          | React 18 + Tailwind + shadcn/ui                |
+| State       | Zustand + TanStack Query                       |
 | Persistence | better-sqlite3 (main) + electron-store (prefs) |
-| Packaging | electron-builder |
-| Monorepo | pnpm workspaces + Turborepo |
+| Packaging   | electron-builder                               |
+| Monorepo    | pnpm workspaces + Turborepo                    |
 
 ## Milestones
 
-| Version | Scope |
-|---------|--------|
+| Version    | Scope                                                        |
+| ---------- | ------------------------------------------------------------ |
 | **v0.1.0** | Phase 0 + 1 + 2 — app shell, LLM playground, trace inspector |
-| **v0.2.0** | ASR + TTS + one pipeline preset |
-| **v1.0.0** | Core modules stable, pipeline composer, plugin API |
+| **v0.2.0** | ASR + TTS + one pipeline preset                              |
+| **v1.0.0** | Core modules stable, pipeline composer, plugin API           |
 
 ## Build order
 
@@ -46,43 +46,41 @@ Phase 0 (Tooling)
 - [x] Add root `README.md` and `README.zh-CN.md`
 - [x] Write `docs/CONTRIBUTING.md` and `docs/ARCHITECTURE.md` (brief)
 - [x] Write `docs/ROADMAP.md` (this file)
-- [ ] Initialize pnpm monorepo (`apps/desktop`, `packages/ui`, `packages/core`, `packages/providers`, `packages/trace`)
-- [ ] Configure TypeScript project references, ESLint, Prettier, Husky (optional)
-- [ ] Scaffold Electron app with electron-vite (main / preload / renderer)
-- [ ] Add `electron-builder` config for Win / macOS / Linux
-- [ ] Set up GitHub Actions: lint, typecheck, build smoke test
+- [x] Initialize pnpm monorepo (`apps/desktop`, `packages/ui`, `packages/core`, `packages/providers`, `packages/trace`)
+- [x] Configure TypeScript project references, ESLint, Prettier
+- [x] Scaffold Electron app with electron-vite (main / preload / renderer)
+- [x] Add `electron-builder` config for Win / macOS / Linux
+- [x] Set up GitHub Actions: lint, typecheck, build smoke test
 
 ---
 
 ## Phase 1 — App Shell & Shared Infrastructure
 
-- [ ] **Layout shell:** `AppLayout` with sidebar, workspace, status bar
-- [ ] **Routing:** React Router — `/`, `/asr`, `/tts`, `/llm`, `/agent`, `/ocr`, `/cv`, `/nlp`, `/pipelines`, `/settings`
-- [ ] **Theme system:** light / dark / system; persist preference
-- [ ] **Settings page:** provider list, API base URLs, default models
-- [ ] **Secure credential vault** (main process): encrypt API keys at rest (safeStorage or keytar)
-- [ ] **`@callister/ui`:** Button, SplitPane, CodeBlock, JsonViewer, AudioPlayer, ImageCanvas
-- [ ] **`@callister/trace`:** `TraceSession`, step recorder, export JSON
-- [ ] **IPC layer:** typed channels for `provider.invoke`, `fixture.load`, `trace.export`
-- [ ] **Home / Launchpad:** module cards with status (configured / not configured)
+- [x] **Layout shell:** `AppLayout` with sidebar, workspace, status bar
+- [x] **Routing:** React Router — `/`, `/asr`, `/tts`, `/llm`, `/agent`, `/ocr`, `/cv`, `/nlp`, `/pipelines`, `/settings`
+- [x] **Theme system:** light / dark / system; persist preference
+- [x] **Settings page:** provider list, API base URLs, default models
+- [x] **Secure credential vault** (main process): encrypt API keys at rest (`safeStorage` + `electron-store`)
+- [x] **`@callister/ui`:** Button, SplitPane, CodeBlock, JsonViewer, Input, Select, TextArea, Panel (AudioPlayer / ImageCanvas deferred to ASR / OCR phases)
+- [x] **`@callister/trace`:** `TraceSession`, step recorder, export JSON
+- [x] **IPC layer:** typed channels for `provider.invoke` (LLM stream), `fixture` import/export, settings, credentials
+- [x] **Home / Launchpad:** module cards with provider configured status
 
 ---
 
 ## Phase 2 — Provider Framework & LLM Playground
 
-Build LLM first — establishes streaming, tracing, and provider patterns reused by Agent and NLP.
-
-- [ ] **`ProviderRegistry`** in `packages/providers`
-- [ ] Adapters: OpenAI-compatible, Anthropic, Ollama (local)
-- [ ] LLM playground UI:
-  - [ ] System + user prompt editors (markdown)
-  - [ ] Model / temperature / max tokens controls
-  - [ ] Streaming response with token counter
-  - [ ] Raw request/response tab in trace inspector
-  - [ ] Latency breakdown (TTFB, total, tokens/sec)
-- [ ] Session history: save / replay / delete conversations
-- [ ] Export session as JSON fixture
-- [ ] Error surface: rate limits, auth failures, timeout with retry
+- [x] **`ProviderRegistry`** in `packages/providers`
+- [x] Adapters: OpenAI-compatible, Anthropic, Ollama (local)
+- [x] LLM playground UI:
+  - [x] System + user prompt editors
+  - [x] Model / temperature / max tokens controls
+  - [x] Streaming response with token counter (estimated)
+  - [x] Raw request/response tab in trace inspector
+  - [x] Latency breakdown (TTFB, total, tokens/sec)
+- [x] Session history: save / replay / delete conversations
+- [x] Export session as JSON fixture
+- [x] Error surface: rate limits, auth failures, retry button
 
 ---
 

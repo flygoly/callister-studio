@@ -25,17 +25,17 @@ Callister Studio is an open-source **desktop workbench** that makes AI processes
 
 ## Features (planned / in progress)
 
-Nothing is marked *Available* yet. This project is in early development.
+Nothing is marked _Available_ yet. This project is in early development.
 
-| Module | Debug & trace | Learn & visualize |
-|--------|---------------|-------------------|
-| LLM | streaming, token stats, raw I/O | prompt experiments |
-| ASR | waveform + timestamps | transcript alignment |
-| TTS | latency metrics | voice A/B comparison |
-| NLP | tokenization view | embeddings explorer |
-| Agent | tool-call timeline | step-by-step loop |
-| OCR / CV | bounding boxes | confidence overlays |
-| Pipelines | end-to-end trace | chain ASR → LLM → TTS |
+| Module    | Debug & trace                   | Learn & visualize     |
+| --------- | ------------------------------- | --------------------- |
+| LLM       | streaming, token stats, raw I/O | prompt experiments    |
+| ASR       | waveform + timestamps           | transcript alignment  |
+| TTS       | latency metrics                 | voice A/B comparison  |
+| NLP       | tokenization view               | embeddings explorer   |
+| Agent     | tool-call timeline              | step-by-step loop     |
+| OCR / CV  | bounding boxes                  | confidence overlays   |
+| Pipelines | end-to-end trace                | chain ASR → LLM → TTS |
 
 Full phased checklist: [docs/ROADMAP.md](docs/ROADMAP.md)
 
@@ -43,11 +43,9 @@ Full phased checklist: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 <!-- TODO: add screenshots after Phase 1 app shell -->
 
-*Coming soon — UI is not built yet.*
+_Coming soon — UI is not built yet._
 
 ## Quick Start
-
-> **Note:** The Electron app scaffold is not in the repo yet. Commands below will work after Phase 0 monorepo setup.
 
 **Prerequisites:** Node.js 20+, pnpm 9+
 
@@ -56,6 +54,14 @@ git clone https://github.com/flygoly/callister-studio.git
 cd callister-studio
 pnpm install
 pnpm dev
+```
+
+`pnpm dev` starts the Electron desktop app. Other useful commands:
+
+```bash
+pnpm build      # production build
+pnpm typecheck  # TypeScript checks
+pnpm lint       # ESLint
 ```
 
 ## Supported platforms
@@ -73,9 +79,9 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## Project status
 
-**Early development.** Documentation and roadmap are in place; application code has not started.
+**Early development.** Phase 0–2 are in place: monorepo shell, settings/credentials, and LLM playground with trace inspector.
 
-- **v0.1.0 target:** app shell + LLM playground + trace inspector
+- **Latest:** LLM playground with streaming, sessions, fixture export
 - **Roadmap:** [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## Contributing

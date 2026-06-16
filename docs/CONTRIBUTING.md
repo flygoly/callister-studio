@@ -4,7 +4,7 @@ Thank you for your interest in Callister Studio.
 
 ## Project stage
 
-The project is in **early development**. Documentation and roadmap exist; the Electron app scaffold is not yet in the repository. Check [ROADMAP.md](ROADMAP.md) for what is planned and what is in progress.
+The project is in **early development**. Phase 0 tooling and an Electron app shell are available; individual AI playgrounds are still placeholders. Check [ROADMAP.md](ROADMAP.md) for what is planned and what is in progress.
 
 ## How to contribute
 
@@ -22,8 +22,6 @@ The project is in **early development**. Documentation and roadmap exist; the El
 
 ## Development setup
 
-> Coming soon — after Phase 0 monorepo scaffold.
-
 ```bash
 git clone https://github.com/flygoly/callister-studio.git
 cd callister-studio
@@ -32,6 +30,8 @@ pnpm dev
 ```
 
 **Prerequisites:** Node.js 20+, pnpm 9+
+
+Useful scripts: `pnpm build`, `pnpm typecheck`, `pnpm lint`, `pnpm format`
 
 ## Code of conduct
 

@@ -20,11 +20,11 @@ callister-studio/
 
 ## Process model
 
-| Process | Responsibility |
-|---------|----------------|
-| **Main** | Window lifecycle, secure credential vault, SQLite, local model subprocesses |
-| **Preload** | Typed IPC bridge (context isolation) |
-| **Renderer** | React UI, playgrounds, trace inspector |
+| Process      | Responsibility                                                              |
+| ------------ | --------------------------------------------------------------------------- |
+| **Main**     | Window lifecycle, secure credential vault, SQLite, local model subprocesses |
+| **Preload**  | Typed IPC bridge (context isolation)                                        |
+| **Renderer** | React UI, playgrounds, trace inspector                                      |
 
 ## Core abstractions
 
@@ -53,10 +53,10 @@ Sidebar entry + route + default layout. Conceptual contract:
 
 ```typescript
 interface PlaygroundModule {
-  id: string;                    // e.g. "asr", "llm"
-  label: string;
-  inputSchema: JsonSchema;
-  run(ctx: RunContext): AsyncIterable<RunEvent>;
+  id: string // e.g. "asr", "llm"
+  label: string
+  inputSchema: JsonSchema
+  run(ctx: RunContext): AsyncIterable<RunEvent>
 }
 ```
 
@@ -83,15 +83,15 @@ interface PlaygroundModule {
 
 ## Tech stack
 
-| Layer | Choice |
-|-------|--------|
-| Desktop | Electron 33+ |
-| Build | electron-vite, TypeScript |
-| UI | React 18, Tailwind CSS, shadcn/ui |
-| State | Zustand, TanStack Query |
+| Layer       | Choice                                        |
+| ----------- | --------------------------------------------- |
+| Desktop     | Electron 33+                                  |
+| Build       | electron-vite, TypeScript                     |
+| UI          | React 18, Tailwind CSS, shadcn/ui             |
+| State       | Zustand, TanStack Query                       |
 | Persistence | better-sqlite3 (main), electron-store (prefs) |
-| Packaging | electron-builder |
-| Monorepo | pnpm workspaces, Turborepo |
+| Packaging   | electron-builder                              |
+| Monorepo    | pnpm workspaces, Turborepo                    |
 
 ## Build phases
 

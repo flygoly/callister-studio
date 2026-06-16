@@ -1,0 +1,33 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@renderer/*": ["src/renderer/src/*"],
+      "@callister/ui": ["../../packages/ui/src/index.tsx"],
+      "@callister/ui/*": ["../../packages/ui/src/*"],
+      "@callister/core": ["../../packages/core/src/index.ts"],
+      "@callister/core/*": ["../../packages/core/src/*"],
+      "@callister/trace": ["../../packages/trace/src/index.ts"],
+      "@callister/trace/*": ["../../packages/trace/src/*"],
+      "@callister/providers": ["../../packages/providers/src/index.ts"],
+      "@callister/providers/*": ["../../packages/providers/src/*"]
+    }
+  },
+  "include": [
+    "src/renderer/src/**/*",
+    "../../packages/ui/src/**/*",
+    "../../packages/core/src/**/*",
+    "../../packages/trace/src/**/*",
+    "../../packages/providers/src/**/*"
+  ],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "../../packages/ui" },
+    { "path": "../../packages/core" },
+    { "path": "../../packages/trace" },
+    { "path": "../../packages/providers" }
+  ]
+}
