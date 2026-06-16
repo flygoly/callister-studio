@@ -74,6 +74,9 @@ const bridge: CallisterBridge = {
     export: (fixture: LLMFixture) => ipcRenderer.invoke(IPC.fixtureExport, fixture),
     import: () => ipcRenderer.invoke(IPC.fixtureImport)
   },
+  system: {
+    openExternal: (url: string) => ipcRenderer.invoke(IPC.systemOpenExternal, url)
+  },
   asr: {
     pickAudio: () => ipcRenderer.invoke(IPC.asrPickAudio),
     saveTemp: (base64: string, fileName: string) =>

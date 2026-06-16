@@ -8,6 +8,7 @@ import {
   CodeBlock,
   Input,
   Panel,
+  ProviderCard,
   Select,
   SplitPane,
   StatusBadge,
@@ -50,6 +51,34 @@ function audioSrcFromAsset(asset: AsrAudioAsset | null): string {
   return `data:${asset.mimeType};base64,${asset.previewBase64}`
 }
 
+function openExternal(url: string) {
+  void callister.system.openExternal?.(url)
+}
+
+const PROVIDER_CARDS = [
+  {
+    id: 'openai' as AsrProviderId,
+    title: 'OpenAI',
+    description: 'Whisper API',
+    icon: '◐',
+    docUrl: 'https://platform.openai.com/docs/guides/speech-to-text'
+  },
+  {
+    id: 'local' as AsrProviderId,
+    title: 'Local',
+    description: 'faster-whisper',
+    icon: '⌂',
+    docUrl: 'https://github.com/SYSTRAN/faster-whisper'
+  },
+  {
+    id: 'xfyun_short' as AsrProviderId,
+    title: 'iFlytek',
+    description: 'IAT / LFASR',
+    icon: '✦',
+    docUrl: 'https://www.xfyun.cn/doc/asr/voicedictation/API.html'
+  }
+]
+
 export function AsrPage() {
   const settings = useAppStore((state) => state.settings)
   const providerStatus = useAppStore((state) => state.providerStatus)
@@ -84,16 +113,6 @@ export function AsrPage() {
 
   const xfyunProviderId: AsrProviderId = xfyunMode === 'short' ? 'xfyun_short' : 'xfyun_long'
 
-  const providerOptions = useMemo(
-    () => [
-      { value: 'openai', label: `OpenAI Whisper${openaiConfigured ? '' : ' (needs API key)'}` },
-      { value: 'local', label: `faster-whisper (local)${localAvailable ? '' : ' (not found)'}` },
-      { value: 'xfyun_short', label: 'iFlytek Short (WebSocket IAT)' },
-      { value: 'xfyun_long', label: 'iFlytek Long (LFASR REST)' }
-    ],
-    [openaiConfigured, localAvailable]
-  )
-
   const sdkLanguageOptions = useMemo(
     () => [
       { value: 'java', label: 'Java' },
@@ -114,7 +133,6 @@ export function AsrPage() {
   )
 
   const isXfyun = activeRun?.providerId === 'xfyun_short' || activeRun?.providerId === 'xfyun_long'
-  const isXfyunMode = activeRun?.providerId === xfyunProviderId
 
   const xfyunSnippet = useMemo(() => {
     if (!isXfyun || !xfyunAppId || !xfyunApiSecret) return ''
@@ -128,7 +146,19 @@ export function AsrPage() {
       hostUrl: asrSettings.providers['xfyun_short']?.baseUrl,
       apiBase: asrSettings.providers['xfyun_long']?.baseUrl
     })
-  }, [isXfyun, xfyunAppId, xfyunApiKey, xfyunApiSecret, xfyunMode, sdkLanguage, asset, settings.asr.providers, xfyunProviderId])
+  }, [isXfyun, xfyunAppId, xfyunApiKey, xfyunApiSecret, xfyunMode, sdkLanguage, asset, asrSettings.providers, xfyunProviderId])
+
+  const providerCardState = useMemo(() => {
+    return PROVIDER_CARDS.map((card) => {
+      if (card.id === 'openai') {
+        return { ...card, tone: openaiConfigured ? ('success' as const) : ('warning' as const), statusText: openaiConfigured ? 'Ready' : 'Needs key' }
+      }
+      if (card.id === 'local') {
+        return { ...card, tone: localAvailable ? ('success' as const) : ('warning' as const), statusText: localAvailable ? 'Ready' : 'Not in PATH' }
+      }
+      return { ...card, tone: 'neutral' as const, statusText: 'iFlytek' }
+    })
+  }, [openaiConfigured, localAvailable])
 
   const compareRun = runs.find((run) => run.id === compareRunId) ?? null
 
@@ -150,24 +180,24 @@ export function AsrPage() {
     if (!activeRun) {
       const providerId = asrSettings.defaultProvider
       setActiveRun(createRun(providerId, asrSettings.providers[providerId].model))
+      return
     }
-    if (!isXfyunMode && activeRun) {
-      if (activeRun.providerId === 'xfyun_short' && xfyunMode !== 'short') {
-        setActiveRun({ ...activeRun, providerId: 'xfyun_short' })
-      } else if (activeRun.providerId === 'xfyun_long' && xfyunMode !== 'long') {
-        setActiveRun({ ...activeRun, providerId: 'xfyun_long' })
-      } else if (
-        (xfyunMode === 'short' && activeRun.providerId !== 'xfyun_short' && activeRun.providerId !== 'xfyun_long') ||
-        (xfyunMode === 'long' && activeRun.providerId !== 'xfyun_short' && activeRun.providerId !== 'xfyun_long')
-      ) {
-        setActiveRun({
-          ...activeRun,
-          providerId: xfyunProviderId,
-          model: asrSettings.providers[xfyunProviderId].model
-        })
-      }
+    if (activeRun.providerId === 'xfyun_short' && xfyunMode !== 'short') {
+      setXfyunMode('short')
+    } else if (activeRun.providerId === 'xfyun_long' && xfyunMode !== 'long') {
+      setXfyunMode('long')
     }
-  }, [activeRun, asrSettings, xfyunMode, xfyunProviderId, isXfyunMode])
+  }, [activeRun, asrSettings, xfyunMode])
+
+  const selectProvider = (providerId: AsrProviderId) => {
+    if (!activeRun) return
+    if (providerId === activeRun.providerId) return
+    const model = asrSettings.providers[providerId].model
+    setActiveRun({ ...activeRun, providerId, model })
+    setResult(null)
+    setTrace(null)
+    setError(null)
+  }
 
   const loadAsset = async (filePath: string) => {
     const nextAsset = await callister.asr.loadAsset(filePath)
@@ -219,6 +249,8 @@ export function AsrPage() {
     setRuns(next)
     setActiveRun(run)
   }
+
+  const currentProviderId = activeRun?.providerId ?? asrSettings.defaultProvider
 
   const runTranscribe = async () => {
     if (!activeRun || !asset || running) return
@@ -356,6 +388,8 @@ export function AsrPage() {
     setCurrentTime(segment.start)
   }
 
+  const currentDocUrl = providerCardState.find((card) => card.id === currentProviderId)?.docUrl ?? ''
+
   if (!activeRun) {
     return <div className="asr-page">Loading ASR workbench...</div>
   }
@@ -364,79 +398,57 @@ export function AsrPage() {
 
   return (
     <div className="asr-page">
-      <div className="asr-toolbar">
-        <Select
-          label="Provider"
-          value={activeRun.providerId}
-          options={providerOptions}
-          onChange={(event) =>
-            setActiveRun({
-              ...activeRun,
-              providerId: event.target.value as AsrProviderId,
-              model: asrSettings.providers[event.target.value as AsrProviderId].model
-            })
-          }
-        />
-        {isXfyun ? (
-          <Select
-            label="Mode"
-            value={xfyunMode}
-            options={xfyunModeOptions}
-            onChange={(event) => {
-              setXfyunMode(event.target.value as 'short' | 'long')
-              const newPid = event.target.value === 'short' ? 'xfyun_short' : 'xfyun_long'
-              setActiveRun({
-                ...activeRun,
-                providerId: newPid as AsrProviderId,
-                model: asrSettings.providers[newPid as AsrProviderId].model
-              })
-            }}
-          />
-        ) : (
-          <>
-            <Input
-              label="Model"
-              value={activeRun.model}
-              onChange={(event) => setActiveRun({ ...activeRun, model: event.target.value })}
+      <div className="asr-provider-cards">
+        <span className="asr-provider-cards__label">Provider</span>
+        <div className="cs-provider-card-grid">
+          {providerCardState.map((card) => (
+            <ProviderCard
+              key={card.id}
+              title={card.title}
+              description={card.description}
+              icon={card.icon}
+              active={currentProviderId === card.id}
+              tone={card.tone}
+              statusText={card.statusText}
+              onClick={() => selectProvider(card.id)}
             />
-          </>
-        )}
-        {isXfyun ? null : (
-          <Input
-            label="Language"
-            value={asrSettings.providers[activeRun.providerId].language}
-            placeholder="auto"
-            onChange={(event) =>
-              useAppStore.getState().updateSettings({
-                ...settings,
-                asr: {
-                  ...asrSettings,
-                  providers: {
-                    ...asrSettings.providers,
-                    [activeRun.providerId]: {
-                      ...asrSettings.providers[activeRun.providerId],
-                      language: event.target.value
-                    }
-                  }
-                }
-              })
-            }
-          />
-        )}
-        <div className="asr-toolbar__actions">
-          <Button variant="primary" disabled={running || !asset} onClick={() => void runTranscribe()}>
-            Transcribe
-          </Button>
-          <Button disabled={!activeRun} onClick={() => void exportFixture()}>
-            Export
-          </Button>
-          <Button onClick={() => void importFixture()}>Import</Button>
+          ))}
         </div>
       </div>
 
       {isXfyun ? (
-        <Panel title="iFlytek Credentials & Debug">
+        <Panel
+          title="iFlytek Credentials & Debug"
+          actions={
+            currentDocUrl ? (
+              <button
+                type="button"
+                className="asr-doc-link"
+                onClick={() => openExternal(currentDocUrl)}
+              >
+                📖 API Reference →
+              </button>
+            ) : null
+          }
+        >
           <div className="asr-xfyun-form">
+            <Select
+              label="Mode"
+              value={xfyunMode}
+              options={xfyunModeOptions}
+              onChange={(event) => {
+                const mode = event.target.value as 'short' | 'long'
+                setXfyunMode(mode)
+                const newPid = mode === 'short' ? 'xfyun_short' : 'xfyun_long'
+                if (activeRun.providerId !== newPid) {
+                  setActiveRun({
+                    ...activeRun,
+                    providerId: newPid,
+                    model: asrSettings.providers[newPid].model
+                  })
+                }
+              }}
+            />
             <Input
               label="App ID / API Key"
               type="password"
@@ -480,7 +492,95 @@ export function AsrPage() {
             </StatusBadge>
           </div>
         </Panel>
-      ) : null}
+      ) : currentProviderId === 'openai' ? (
+        <Panel
+          title="OpenAI Whisper"
+          actions={
+            currentDocUrl ? (
+              <button
+                type="button"
+                className="asr-doc-link"
+                onClick={() => openExternal(currentDocUrl)}
+              >
+                📖 API Reference →
+              </button>
+            ) : null
+          }
+        >
+          <div className="asr-provider-config">
+            <Input
+              label="Model"
+              value={activeRun.model}
+              onChange={(event) => setActiveRun({ ...activeRun, model: event.target.value })}
+            />
+            <Input
+              label="Language"
+              value={asrSettings.providers.openai.language}
+              placeholder="auto"
+              onChange={(event) =>
+                useAppStore.getState().updateSettings({
+                  ...settings,
+                  asr: {
+                    ...asrSettings,
+                    providers: {
+                      ...asrSettings.providers,
+                      openai: { ...asrSettings.providers.openai, language: event.target.value }
+                    }
+                  }
+                })
+              }
+            />
+          </div>
+          {!openaiConfigured ? (
+            <p className="settings-hint">OpenAI API key not configured. Add it in Settings.</p>
+          ) : null}
+        </Panel>
+      ) : (
+        <Panel
+          title="faster-whisper (local)"
+          actions={
+            currentDocUrl ? (
+              <button
+                type="button"
+                className="asr-doc-link"
+                onClick={() => openExternal(currentDocUrl)}
+              >
+                📖 GitHub →
+              </button>
+            ) : null
+          }
+        >
+          <div className="asr-provider-config">
+            <Input
+              label="Model"
+              value={activeRun.model}
+              onChange={(event) => setActiveRun({ ...activeRun, model: event.target.value })}
+            />
+            <Input
+              label="Language"
+              value={asrSettings.providers.local.language}
+              placeholder="auto"
+              onChange={(event) =>
+                useAppStore.getState().updateSettings({
+                  ...settings,
+                  asr: {
+                    ...asrSettings,
+                    providers: {
+                      ...asrSettings.providers,
+                      local: { ...asrSettings.providers.local, language: event.target.value }
+                    }
+                  }
+                })
+              }
+            />
+          </div>
+          {!localAvailable ? (
+            <p className="settings-hint">
+              faster-whisper CLI not found in PATH. Install it and restart the app.
+            </p>
+          ) : null}
+        </Panel>
+      )}
 
       <div className="asr-layout">
         <Panel title="Runs" className="asr-runs">
@@ -675,6 +775,16 @@ export function AsrPage() {
             />
           }
         />
+      </div>
+
+      <div className="asr-toolbar__actions">
+        <Button variant="primary" disabled={running || !asset} onClick={() => void runTranscribe()}>
+          Transcribe
+        </Button>
+        <Button disabled={!activeRun} onClick={() => void exportFixture()}>
+          Export
+        </Button>
+        <Button onClick={() => void importFixture()}>Import</Button>
       </div>
     </div>
   )

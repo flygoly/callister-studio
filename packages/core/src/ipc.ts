@@ -34,7 +34,8 @@ export const IPC = {
   asrRunsSave: 'asr:runs-save',
   asrRunsDelete: 'asr:runs-delete',
   asrFixtureExport: 'asr:fixture-export',
-  asrFixtureImport: 'asr:fixture-import'
+  asrFixtureImport: 'asr:fixture-import',
+  systemOpenExternal: 'system:open-external'
 } as const
 
 export type CredentialsSetPayload = {
@@ -102,6 +103,9 @@ export type CallisterBridge = {
   fixture: {
     export: (fixture: LLMFixture) => Promise<string>
     import: () => Promise<LLMFixture | null>
+  }
+  system: {
+    openExternal: (url: string) => Promise<void>
   }
   asr: {
     pickAudio: () => Promise<string | null>

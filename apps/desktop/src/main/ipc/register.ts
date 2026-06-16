@@ -1,4 +1,4 @@
-import { dialog, ipcMain } from 'electron'
+import { dialog, ipcMain, shell } from 'electron'
 import { readFile, writeFile } from 'fs/promises'
 import type {
   AppSettings,
@@ -143,5 +143,9 @@ export function registerIpcHandlers(): void {
     if (result.canceled || !result.filePaths[0]) return null
     const raw = await readFile(result.filePaths[0], 'utf8')
     return JSON.parse(raw) as AsrFixture
+  })
+
+  ipcMain.handle(IPC.systemOpenExternal, async (_event, url: string) => {
+    await shell.openExternal(url)
   })
 }

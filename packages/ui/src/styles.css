@@ -45,9 +45,20 @@
 }
 
 .cs-panel__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--cs-border);
   font-weight: 600;
+}
+
+.cs-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
 }
 
 .cs-panel__body {
@@ -130,6 +141,108 @@
 .cs-badge--danger {
   background: #3a1d24;
   color: #ffb4c0;
+}
+
+.cs-provider-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--cs-border);
+  border-radius: 12px;
+  background: var(--cs-surface);
+  color: var(--cs-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+  min-width: 180px;
+}
+
+.cs-provider-card:hover:not(:disabled) {
+  border-color: var(--cs-accent);
+  transform: translateY(-1px);
+}
+
+.cs-provider-card--active {
+  border-color: var(--cs-accent);
+  background: color-mix(in srgb, var(--cs-accent) 10%, var(--cs-surface));
+}
+
+.cs-provider-card--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cs-provider-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--cs-surface-2);
+  border: 1px solid var(--cs-border);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.cs-provider-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cs-provider-card__title {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-provider-card__description {
+  font-size: 11px;
+  color: var(--cs-text-muted);
+}
+
+.cs-provider-card__status {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cs-provider-card__status--neutral {
+  background: var(--cs-surface-2);
+  color: var(--cs-text-muted);
+}
+
+.cs-provider-card__status--success {
+  background: #163223;
+  color: #7ddea2;
+}
+
+.cs-provider-card__status--warning {
+  background: #2a2114;
+  color: #f0b35c;
+}
+
+.cs-provider-card__status--danger {
+  background: #3a1d24;
+  color: #ffb4c0;
+}
+
+.cs-provider-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .cs-split-pane {
