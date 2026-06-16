@@ -6,7 +6,7 @@ import { useAppStore } from '../stores/useAppStore'
 import { ThemeToggle } from '../components/ThemeToggle'
 
 const providerOrder: ProviderId[] = ['openai', 'anthropic', 'ollama']
-const asrProviderOrder: AsrProviderId[] = ['openai', 'local']
+const asrProviderOrder: AsrProviderId[] = ['openai', 'local', 'xfyun_short', 'xfyun_long']
 
 export function SettingsPage() {
   const settings = useAppStore((state) => state.settings)
@@ -18,6 +18,8 @@ export function SettingsPage() {
     anthropic: '',
     ollama: ''
   })
+  const [xfyunKey, setXfyunKey] = useState('')
+  const [xfyunSecret, setXfyunSecret] = useState('')
   const [message, setMessage] = useState('')
   const [localWhisperAvailable, setLocalWhisperAvailable] = useState(false)
 
@@ -167,7 +169,9 @@ export function SettingsPage() {
             value={settings.asr.defaultProvider}
             options={[
               { value: 'openai', label: 'OpenAI Whisper' },
-              { value: 'local', label: 'faster-whisper (local)' }
+              { value: 'local', label: 'faster-whisper (local)' },
+              { value: 'xfyun_short', label: 'iFlytek Short (WebSocket IAT)' },
+              { value: 'xfyun_long', label: 'iFlytek Long (LFASR REST)' }
             ]}
             onChange={(event) =>
               updateSettings({
@@ -184,7 +188,15 @@ export function SettingsPage() {
 
       {asrProviderOrder.map((providerId) => {
         const asrProvider = settings.asr.providers[providerId]
-        const label = providerId === 'openai' ? 'OpenAI Whisper' : 'faster-whisper (local)'
+        const label =
+          providerId === 'openai'
+            ? 'OpenAI Whisper'
+            : providerId === 'local'
+              ? 'faster-whisper (local)'
+              : providerId === 'xfyun_short'
+                ? 'iFlytek Short (WebSocket IAT)'
+                : 'iFlytek Long (LFASR REST)'
+        const isXfyun = providerId === 'xfyun_short' || providerId === 'xfyun_long'
 
         return (
           <Panel key={providerId} title={label}>
@@ -199,10 +211,12 @@ export function SettingsPage() {
                       ? 'API key configured'
                       : 'Needs OpenAI API key'}
                   </StatusBadge>
-                ) : (
+                ) : providerId === 'local' ? (
                   <StatusBadge tone={localWhisperAvailable ? 'success' : 'warning'}>
                     {localWhisperAvailable ? 'CLI found' : 'faster-whisper not in PATH'}
                   </StatusBadge>
+                ) : (
+                  <StatusBadge tone="warning">Needs App ID + API Secret</StatusBadge>
                 )}
               </div>
 
@@ -226,40 +240,79 @@ export function SettingsPage() {
                 Enable provider
               </label>
 
-              <Input
-                label="Model"
-                value={asrProvider.model}
-                onChange={(event) =>
-                  updateSettings({
-                    ...settings,
-                    asr: {
-                      ...settings.asr,
-                      providers: {
-                        ...settings.asr.providers,
-                        [providerId]: { ...asrProvider, model: event.target.value }
-                      }
+              {!isXfyun ? (
+                <>
+                  <Input
+                    label="Model"
+                    value={asrProvider.model}
+                    onChange={(event) =>
+                      updateSettings({
+                        ...settings,
+                        asr: {
+                          ...settings.asr,
+                          providers: {
+                            ...settings.asr.providers,
+                            [providerId]: { ...asrProvider, model: event.target.value }
+                          }
+                        }
+                      })
                     }
-                  })
-                }
-              />
-
-              <Input
-                label="Language"
-                placeholder="auto"
-                value={asrProvider.language}
-                onChange={(event) =>
-                  updateSettings({
-                    ...settings,
-                    asr: {
-                      ...settings.asr,
-                      providers: {
-                        ...settings.asr.providers,
-                        [providerId]: { ...asrProvider, language: event.target.value }
-                      }
+                  />
+                  <Input
+                    label="Language"
+                    placeholder="auto"
+                    value={asrProvider.language}
+                    onChange={(event) =>
+                      updateSettings({
+                        ...settings,
+                        asr: {
+                          ...settings.asr,
+                          providers: {
+                            ...settings.asr.providers,
+                            [providerId]: { ...asrProvider, language: event.target.value }
+                          }
+                        }
+                      })
                     }
-                  })
-                }
-              />
+                  />
+                </>
+              ) : (
+                <>
+                  <Input
+                    label="Base URL"
+                    value={asrProvider.baseUrl ?? ''}
+                    onChange={(event) =>
+                      updateSettings({
+                        ...settings,
+                        asr: {
+                          ...settings.asr,
+                          providers: {
+                            ...settings.asr.providers,
+                            [providerId]: { ...asrProvider, baseUrl: event.target.value }
+                          }
+                        }
+                      })
+                    }
+                  />
+                  <Input
+                    label="Recognize language"
+                    placeholder="zh_cn"
+                    value={asrProvider.language}
+                    onChange={(event) =>
+                      updateSettings({
+                        ...settings,
+                        asr: {
+                          ...settings.asr,
+                          providers: {
+                            ...settings.asr.providers,
+                            [providerId]: { ...asrProvider, language: event.target.value }
+                          }
+                        }
+                      })
+                    }
+                  />
+                </>
+              )}
 
               {providerId === 'openai' ? (
                 <Input
@@ -278,10 +331,48 @@ export function SettingsPage() {
                     })
                   }
                 />
-              ) : (
+              ) : providerId === 'local' ? (
                 <p className="settings-hint">
                   Install faster-whisper and ensure the CLI is available in your PATH.
                 </p>
+              ) : (
+                <>
+                  <div className="settings-actions">
+                    <Input
+                      label="App ID / API Key"
+                      type="password"
+                      placeholder="Paste iFlytek API Key"
+                      value={xfyunKey}
+                      onChange={(event) => setXfyunKey(event.target.value)}
+                    />
+                    <Input
+                      label="API Secret"
+                      type="password"
+                      placeholder="Paste iFlytek API Secret"
+                      value={xfyunSecret}
+                      onChange={(event) => setXfyunSecret(event.target.value)}
+                    />
+                    <Button
+                      variant="ghost"
+                      onClick={async () => {
+                        if (!xfyunKey.trim() || !xfyunSecret.trim()) return
+                        await callister.credentials.set({
+                          providerId: 'xfyun' as ProviderId,
+                          apiKey: `${xfyunKey.trim()}|${xfyunSecret.trim()}`
+                        })
+                        setXfyunKey('')
+                        setXfyunSecret('')
+                        setMessage('iFlytek credentials saved')
+                      }}
+                    >
+                      Save credentials
+                    </Button>
+                  </div>
+                  <p className="settings-hint">
+                    Get your {label} credentials from the iFlytek Open Platform console.
+                    For IAT: use API Key as app_id. For LFASR: use App ID and Secret.
+                  </p>
+                </>
               )}
             </div>
           </Panel>

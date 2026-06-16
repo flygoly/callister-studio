@@ -359,6 +359,17 @@ a {
   gap: 12px;
 }
 
+.asr-xfyun-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.asr-xfyun-hint {
+  margin-top: 8px;
+}
+
 .llm-sessions .cs-panel__body,
 .session-list {
   display: flex;

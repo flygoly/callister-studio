@@ -3,6 +3,7 @@ import type { AsrSegment, AsrTranscribeRequest } from '@callister/core'
 export type AsrTranscribeOptions = {
   request: AsrTranscribeRequest
   apiKey: string
+  apiSecret?: string
   baseUrl: string
   readFile: (filePath: string) => Promise<Buffer>
 }
@@ -17,7 +18,7 @@ export type AsrTranscribeOutput = {
 }
 
 export type AsrProviderAdapter = {
-  id: 'openai' | 'local'
+  id: 'openai' | 'local' | 'xfyun_short' | 'xfyun_long'
   label: string
   transcribe: (options: AsrTranscribeOptions) => Promise<AsrTranscribeOutput>
 }

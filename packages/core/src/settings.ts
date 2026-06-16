@@ -2,7 +2,7 @@ export type ThemeMode = 'light' | 'dark' | 'system'
 
 export type ProviderId = 'openai' | 'anthropic' | 'ollama'
 
-export type AsrProviderId = 'openai' | 'local'
+export type AsrProviderId = 'openai' | 'local' | 'xfyun_short' | 'xfyun_long'
 
 export type AsrProviderSettings = {
   enabled: boolean
@@ -29,6 +29,18 @@ export const DEFAULT_ASR_SETTINGS: AsrSettings = {
       enabled: false,
       model: 'base',
       language: 'auto'
+    },
+    xfyun_short: {
+      enabled: true,
+      model: 'iat',
+      language: 'zh_cn',
+      baseUrl: 'wss://iat-api.xfyun.cn/v2/iat'
+    },
+    xfyun_long: {
+      enabled: true,
+      model: 'lfasr',
+      language: 'zh_cn',
+      baseUrl: 'https://raasr.xfyun.cn/api'
     }
   }
 }

@@ -24,23 +24,23 @@ function decrypt(value: string): string {
   return buffer.toString('utf8')
 }
 
-export function setApiKey(providerId: ProviderId, apiKey: string): void {
+export function setApiKey(providerId: ProviderId | 'xfyun', apiKey: string): void {
   const credentials = store.get('credentials')
   credentials[providerId] = encrypt(apiKey.trim())
   store.set('credentials', credentials)
 }
 
-export function deleteApiKey(providerId: ProviderId): void {
+export function deleteApiKey(providerId: ProviderId | 'xfyun'): void {
   const credentials = store.get('credentials')
   delete credentials[providerId]
   store.set('credentials', credentials)
 }
 
-export function hasApiKey(providerId: ProviderId): boolean {
+export function hasApiKey(providerId: ProviderId | 'xfyun'): boolean {
   return Boolean(store.get('credentials')[providerId])
 }
 
-export function getApiKey(providerId: ProviderId): string | null {
+export function getApiKey(providerId: ProviderId | 'xfyun'): string | null {
   const encrypted = store.get('credentials')[providerId]
   if (!encrypted) return null
   try {

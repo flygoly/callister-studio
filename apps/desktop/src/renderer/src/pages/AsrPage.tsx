@@ -1,16 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type {
-  AsrAudioAsset,
-  AsrBatchItem,
-  AsrProviderId,
-  AsrRun,
-  AsrSegment,
-  AsrTranscribeResult
-} from '@callister/core'
+import type { AsrAudioAsset, AsrBatchItem, AsrProviderId, AsrRun, AsrSdkLanguage, AsrSegment, AsrTranscribeResult } from '@callister/core'
+import { buildXfyunSnippet } from '@callister/core'
 import { TraceSession } from '@callister/trace'
 import {
   AudioPlayer,
   Button,
+  CodeBlock,
   Input,
   Panel,
   Select,
@@ -75,6 +70,11 @@ export function AsrPage() {
   const [batchItems, setBatchItems] = useState<AsrBatchItem[]>([])
   const [batchRunning, setBatchRunning] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [xfyunMode, setXfyunMode] = useState<'short' | 'long'>('short')
+  const [xfyunAppId, setXfyunAppId] = useState('')
+  const [xfyunApiKey, setXfyunApiKey] = useState('')
+  const [xfyunApiSecret, setXfyunApiSecret] = useState('')
+  const [sdkLanguage, setSdkLanguage] = useState<AsrSdkLanguage>('nodejs')
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -82,19 +82,53 @@ export function AsrPage() {
   const asrSettings = settings.asr
   const openaiConfigured = providerStatus.find((item) => item.id === 'openai')?.configured ?? false
 
+  const xfyunProviderId: AsrProviderId = xfyunMode === 'short' ? 'xfyun_short' : 'xfyun_long'
+
   const providerOptions = useMemo(
     () => [
-      {
-        value: 'openai',
-        label: `OpenAI Whisper${openaiConfigured ? '' : ' (needs API key)'}`
-      },
-      {
-        value: 'local',
-        label: `faster-whisper (local)${localAvailable ? '' : ' (not found)'}`
-      }
+      { value: 'openai', label: `OpenAI Whisper${openaiConfigured ? '' : ' (needs API key)'}` },
+      { value: 'local', label: `faster-whisper (local)${localAvailable ? '' : ' (not found)'}` },
+      { value: 'xfyun_short', label: 'iFlytek Short (WebSocket IAT)' },
+      { value: 'xfyun_long', label: 'iFlytek Long (LFASR REST)' }
     ],
     [openaiConfigured, localAvailable]
   )
+
+  const sdkLanguageOptions = useMemo(
+    () => [
+      { value: 'java', label: 'Java' },
+      { value: 'python', label: 'Python' },
+      { value: 'nodejs', label: 'Node.js' },
+      { value: 'go', label: 'Go' },
+      { value: 'curl', label: 'cURL' }
+    ],
+    []
+  )
+
+  const xfyunModeOptions = useMemo(
+    () => [
+      { value: 'short', label: 'Short (WebSocket IAT ≤60s)' },
+      { value: 'long', label: 'Long (REST LFASR ≤5h)' }
+    ],
+    []
+  )
+
+  const isXfyun = activeRun?.providerId === 'xfyun_short' || activeRun?.providerId === 'xfyun_long'
+  const isXfyunMode = activeRun?.providerId === xfyunProviderId
+
+  const xfyunSnippet = useMemo(() => {
+    if (!isXfyun || !xfyunAppId || !xfyunApiSecret) return ''
+    return buildXfyunSnippet(sdkLanguage, {
+      mode: xfyunMode,
+      appId: xfyunAppId,
+      apiKey: xfyunApiKey,
+      apiSecret: xfyunApiSecret,
+      language: asrSettings.providers[xfyunProviderId].language,
+      fileName: asset?.fileName ?? 'audio.wav',
+      hostUrl: asrSettings.providers['xfyun_short']?.baseUrl,
+      apiBase: asrSettings.providers['xfyun_long']?.baseUrl
+    })
+  }, [isXfyun, xfyunAppId, xfyunApiKey, xfyunApiSecret, xfyunMode, sdkLanguage, asset, settings.asr.providers, xfyunProviderId])
 
   const compareRun = runs.find((run) => run.id === compareRunId) ?? null
 
@@ -117,7 +151,23 @@ export function AsrPage() {
       const providerId = asrSettings.defaultProvider
       setActiveRun(createRun(providerId, asrSettings.providers[providerId].model))
     }
-  }, [activeRun, asrSettings])
+    if (!isXfyunMode && activeRun) {
+      if (activeRun.providerId === 'xfyun_short' && xfyunMode !== 'short') {
+        setActiveRun({ ...activeRun, providerId: 'xfyun_short' })
+      } else if (activeRun.providerId === 'xfyun_long' && xfyunMode !== 'long') {
+        setActiveRun({ ...activeRun, providerId: 'xfyun_long' })
+      } else if (
+        (xfyunMode === 'short' && activeRun.providerId !== 'xfyun_short' && activeRun.providerId !== 'xfyun_long') ||
+        (xfyunMode === 'long' && activeRun.providerId !== 'xfyun_short' && activeRun.providerId !== 'xfyun_long')
+      ) {
+        setActiveRun({
+          ...activeRun,
+          providerId: xfyunProviderId,
+          model: asrSettings.providers[xfyunProviderId].model
+        })
+      }
+    }
+  }, [activeRun, asrSettings, xfyunMode, xfyunProviderId, isXfyunMode])
 
   const loadAsset = async (filePath: string) => {
     const nextAsset = await callister.asr.loadAsset(filePath)
@@ -184,7 +234,14 @@ export function AsrPage() {
       model: activeRun.model || providerSettings.model,
       language: providerSettings.language,
       filePath: asset.filePath,
-      fileName: asset.fileName
+      fileName: asset.fileName,
+      auth: isXfyun
+        ? {
+            appId: xfyunAppId,
+            apiKey: xfyunApiKey || xfyunAppId,
+            apiSecret: xfyunApiSecret
+          }
+        : undefined
     }
 
     const traceSession = new TraceSession()
@@ -320,31 +377,52 @@ export function AsrPage() {
             })
           }
         />
-        <Input
-          label="Model"
-          value={activeRun.model}
-          onChange={(event) => setActiveRun({ ...activeRun, model: event.target.value })}
-        />
-        <Input
-          label="Language"
-          value={asrSettings.providers[activeRun.providerId].language}
-          placeholder="auto"
-          onChange={(event) =>
-            useAppStore.getState().updateSettings({
-              ...settings,
-              asr: {
-                ...asrSettings,
-                providers: {
-                  ...asrSettings.providers,
-                  [activeRun.providerId]: {
-                    ...asrSettings.providers[activeRun.providerId],
-                    language: event.target.value
+        {isXfyun ? (
+          <Select
+            label="Mode"
+            value={xfyunMode}
+            options={xfyunModeOptions}
+            onChange={(event) => {
+              setXfyunMode(event.target.value as 'short' | 'long')
+              const newPid = event.target.value === 'short' ? 'xfyun_short' : 'xfyun_long'
+              setActiveRun({
+                ...activeRun,
+                providerId: newPid as AsrProviderId,
+                model: asrSettings.providers[newPid as AsrProviderId].model
+              })
+            }}
+          />
+        ) : (
+          <>
+            <Input
+              label="Model"
+              value={activeRun.model}
+              onChange={(event) => setActiveRun({ ...activeRun, model: event.target.value })}
+            />
+          </>
+        )}
+        {isXfyun ? null : (
+          <Input
+            label="Language"
+            value={asrSettings.providers[activeRun.providerId].language}
+            placeholder="auto"
+            onChange={(event) =>
+              useAppStore.getState().updateSettings({
+                ...settings,
+                asr: {
+                  ...asrSettings,
+                  providers: {
+                    ...asrSettings.providers,
+                    [activeRun.providerId]: {
+                      ...asrSettings.providers[activeRun.providerId],
+                      language: event.target.value
+                    }
                   }
                 }
-              }
-            })
-          }
-        />
+              })
+            }
+          />
+        )}
         <div className="asr-toolbar__actions">
           <Button variant="primary" disabled={running || !asset} onClick={() => void runTranscribe()}>
             Transcribe
@@ -355,6 +433,54 @@ export function AsrPage() {
           <Button onClick={() => void importFixture()}>Import</Button>
         </div>
       </div>
+
+      {isXfyun ? (
+        <Panel title="iFlytek Credentials & Debug">
+          <div className="asr-xfyun-form">
+            <Input
+              label="App ID / API Key"
+              type="password"
+              placeholder="iFlytek API Key"
+              value={xfyunAppId}
+              onChange={(event) => setXfyunAppId(event.target.value)}
+            />
+            <Input
+              label="API Key (IAT)"
+              type="password"
+              placeholder="For IAT, if different from App ID"
+              value={xfyunApiKey}
+              onChange={(event) => setXfyunApiKey(event.target.value)}
+            />
+            <Input
+              label="API Secret"
+              type="password"
+              placeholder="iFlytek API Secret"
+              value={xfyunApiSecret}
+              onChange={(event) => setXfyunApiSecret(event.target.value)}
+            />
+            <Select
+              label="SDK language"
+              value={sdkLanguage}
+              options={sdkLanguageOptions}
+              onChange={(event) => setSdkLanguage(event.target.value as AsrSdkLanguage)}
+            />
+          </div>
+          {xfyunSnippet ? (
+            <CodeBlock code={xfyunSnippet} language={sdkLanguage === 'curl' ? 'bash' : sdkLanguage} />
+          ) : (
+            <p className="settings-hint">
+              Enter your App ID, API Key, and API Secret above to generate an SDK snippet
+              showing the full call flow ({xfyunMode === 'short' ? 'WebSocket IAT' : 'REST LFASR'}). 
+              Then load an audio file and click Transcribe to see the result JSON.
+            </p>
+          )}
+          <div className="asr-xfyun-hint">
+            <StatusBadge tone="warning">
+              IAT: 16kHz PCM mono · LFASR: wav/flac/mp3/m4a · Max IAT 60s / LFASR 5h
+            </StatusBadge>
+          </div>
+        </Panel>
+      ) : null}
 
       <div className="asr-layout">
         <Panel title="Runs" className="asr-runs">

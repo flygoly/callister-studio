@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { basename, join } from 'path'
 import { app } from 'electron'
-import type { AsrAudioAsset, AsrBatchItem, AsrTranscribeRequest, AsrTranscribeResult } from '@callister/core'
+import type { AsrAudioAsset, AsrBatchItem, AsrTranscribeRequest, AsrTranscribeResult, ProviderId } from '@callister/core'
 import { getAsrAdapter } from '@callister/providers'
 import { getApiKey } from './credentialVault'
 import { getSettings } from './settingsService'
@@ -66,14 +66,24 @@ export async function transcribeAudio(
   const adapter = getAsrAdapter(request.providerId)
   const startedAt = Date.now()
 
-  const apiKey = request.providerId === 'openai' ? getApiKey('openai') : ''
+  const apiKey = (request.providerId === 'openai' || request.providerId === 'xfyun_short' || request.providerId === 'xfyun_long')
+    ? (request.auth?.apiKey ?? getApiKey('openai'))
+    : ''
+  const apiSecret = (request.providerId === 'xfyun_short' || request.providerId === 'xfyun_long')
+    ? (request.auth?.apiSecret ?? getApiKey('xfyun' as ProviderId))
+    : undefined
+
   if (request.providerId === 'openai' && !apiKey) {
     throw new Error('OpenAI API key not configured (used for Whisper)')
+  }
+  if ((request.providerId === 'xfyun_short' || request.providerId === 'xfyun_long') && (!apiKey || !apiSecret)) {
+    throw new Error('iFlytek App ID and API Secret are required in Settings')
   }
 
   const output = await adapter.transcribe({
     request,
     apiKey: apiKey ?? '',
+    apiSecret: apiSecret ?? '',
     baseUrl: asrSettings.baseUrl ?? settings.providers.openai.baseUrl,
     readFile: (filePath) => readFile(filePath)
   })

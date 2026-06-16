@@ -19,6 +19,7 @@ export type {
   AsrFixture,
   AsrMetrics,
   AsrRun,
+  AsrSdkLanguage,
   AsrSegment,
   AsrTranscribeRequest,
   AsrTranscribeResult
@@ -43,3 +44,9 @@ export type {
   LLMStreamPayload
 } from './ipc'
 export { IPC } from './ipc'
+export {
+  buildXfyunSnippet
+} from './asr'
+export type {
+  XfyunSnippetContext
+} from './asr'

@@ -17,9 +17,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@callister/core": "workspace:*"
+    "@callister/core": "workspace:*",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@types/ws": "^8.5.13",
     "typescript": "^5.7.2"
   }
 }

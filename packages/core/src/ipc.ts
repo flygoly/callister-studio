@@ -38,12 +38,12 @@ export const IPC = {
 } as const
 
 export type CredentialsSetPayload = {
-  providerId: ProviderId
+  providerId: ProviderId | 'xfyun'
   apiKey: string
 }
 
 export type CredentialsDeletePayload = {
-  providerId: ProviderId
+  providerId: ProviderId | 'xfyun'
 }
 
 export type LLMStreamPayload = {
