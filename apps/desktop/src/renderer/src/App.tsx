@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './layouts/AppLayout'
+import { AsrPage } from './pages/AsrPage'
 import { HomePage } from './pages/HomePage'
 import { LlmPage } from './pages/LlmPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
@@ -28,7 +29,7 @@ export function App(): React.ReactElement {
       <Routes>
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
-          <Route path="asr" element={<PlaceholderPage module="ASR" />} />
+          <Route path="asr" element={<AsrPage />} />
           <Route path="tts" element={<PlaceholderPage module="TTS" />} />
           <Route path="llm" element={<LlmPage />} />
           <Route path="agent" element={<PlaceholderPage module="Agent" />} />

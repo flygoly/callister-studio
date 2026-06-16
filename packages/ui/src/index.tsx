@@ -1,5 +1,6 @@
 import './styles.css'
 
+export { AudioPlayer } from './AudioPlayer'
 export { Button } from './Button'
 export { CodeBlock } from './CodeBlock'
 export { Input } from './Input'
@@ -9,3 +10,4 @@ export { Select } from './Select'
 export { SplitPane } from './SplitPane'
 export { StatusBadge } from './StatusBadge'
 export { TextArea } from './TextArea'
+export { Waveform } from './Waveform'

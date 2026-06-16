@@ -165,7 +165,8 @@ a {
 .home-page,
 .placeholder-page,
 .settings-page,
-.llm-page {
+.llm-page,
+.asr-page {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -235,7 +236,10 @@ a {
 .settings-row,
 .settings-actions,
 .llm-toolbar,
-.llm-toolbar__actions {
+.llm-toolbar__actions,
+.asr-toolbar,
+.asr-toolbar__actions,
+.asr-input-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -256,6 +260,103 @@ a {
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 16px;
+}
+
+.asr-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+}
+
+.asr-dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px dashed var(--cs-border);
+  border-radius: 12px;
+  background: var(--cs-surface-2);
+}
+
+.asr-dropzone--active {
+  border-color: var(--cs-accent);
+}
+
+.asr-asset-meta,
+.asr-batch-header,
+.asr-batch-item__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.asr-duration,
+.asr-batch-meta,
+.asr-detected-language {
+  color: var(--cs-text-muted);
+  font-size: 13px;
+}
+
+.asr-compare h4,
+.asr-batch h4 {
+  margin: 16px 0 8px;
+}
+
+.asr-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.asr-batch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.asr-batch-item {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--cs-surface-2);
+}
+
+.asr-batch-item p {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+}
+
+.asr-segments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.asr-segment-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--cs-surface-2);
+}
+
+.asr-segment-row p {
+  margin: 0;
+}
+
+.asr-segment-time,
+.asr-segment-confidence {
+  color: var(--cs-text-muted);
+  font-size: 12px;
+}
+
+.asr-runs .cs-panel__body,
+.asr-compare-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .llm-sessions .cs-panel__body,
@@ -368,7 +469,12 @@ a {
 }
 
 @media (max-width: 1100px) {
-  .llm-layout {
+  .llm-layout,
+  .asr-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .asr-compare-grid {
     grid-template-columns: 1fr;
   }
 }

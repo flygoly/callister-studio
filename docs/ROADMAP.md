@@ -61,7 +61,7 @@ Phase 0 (Tooling)
 - [x] **Theme system:** light / dark / system; persist preference
 - [x] **Settings page:** provider list, API base URLs, default models
 - [x] **Secure credential vault** (main process): encrypt API keys at rest (`safeStorage` + `electron-store`)
-- [x] **`@callister/ui`:** Button, SplitPane, CodeBlock, JsonViewer, Input, Select, TextArea, Panel (AudioPlayer / ImageCanvas deferred to ASR / OCR phases)
+- [x] **`@callister/ui`:** Button, SplitPane, CodeBlock, JsonViewer, Input, Select, TextArea, Panel, AudioPlayer, Waveform
 - [x] **`@callister/trace`:** `TraceSession`, step recorder, export JSON
 - [x] **IPC layer:** typed channels for `provider.invoke` (LLM stream), `fixture` import/export, settings, credentials
 - [x] **Home / Launchpad:** module cards with provider configured status
@@ -86,13 +86,15 @@ Phase 0 (Tooling)
 
 ## Phase 3 — ASR Playground
 
-- [ ] Audio input: file upload (wav / mp3 / m4a), microphone record, drag-and-drop
-- [ ] Waveform visualization + playback scrubber
-- [ ] Providers: OpenAI Whisper API, faster-whisper (local via subprocess), Google STT (optional)
-- [ ] Output: transcript, word / segment timestamps, confidence (when available)
-- [ ] Overlay timestamps on waveform
-- [ ] Compare two ASR runs side-by-side (diff view)
+- [x] Audio input: file upload (wav / mp3 / m4a), microphone record, drag-and-drop
+- [x] Waveform visualization + playback scrubber
+- [x] Providers: OpenAI Whisper API, faster-whisper (local via subprocess)
+- [x] Output: transcript, word / segment timestamps, confidence (when available)
+- [x] Overlay timestamps on waveform
+- [x] Compare two ASR runs side-by-side (diff view)
+- [x] Batch mode: single-file batch runs with status + export via fixture
 - [ ] Batch mode: folder of audio files → CSV / JSON export
+- [ ] Google STT provider (optional)
 
 ---
 

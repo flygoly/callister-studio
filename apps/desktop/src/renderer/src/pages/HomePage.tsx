@@ -14,7 +14,7 @@ const modules = [
     path: '/asr',
     title: 'ASR',
     description: 'Speech-to-text with waveform and timestamp overlays.',
-    ready: false
+    ready: true
   },
   {
     path: '/tts',

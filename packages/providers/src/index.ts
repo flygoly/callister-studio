@@ -1,4 +1,5 @@
 import type { ProviderId } from '@callister/core'
+import { getAsrAdapter, probeLocalWhisper } from './asr'
 import { anthropicAdapter } from './llm/anthropic'
 import { ollamaAdapter, openaiAdapter } from './llm/openai'
 import type { LLMProviderAdapter } from './llm/types'
@@ -21,6 +22,7 @@ export function listLLMProviders(): LLMProviderAdapter[] {
   return Object.values(adapters)
 }
 
+export { getAsrAdapter, probeLocalWhisper }
 export { anthropicAdapter, ollamaAdapter, openaiAdapter }
 export type { LLMProviderAdapter }
 export { estimateTokens, ProviderHttpError } from './utils'

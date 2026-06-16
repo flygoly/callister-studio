@@ -1,6 +1,9 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import type {
   AppSettings,
+  AsrFixture,
+  AsrRun,
+  AsrTranscribeRequest,
   CallisterBridge,
   CredentialsDeletePayload,
   CredentialsSetPayload,
@@ -70,6 +73,25 @@ const bridge: CallisterBridge = {
   fixture: {
     export: (fixture: LLMFixture) => ipcRenderer.invoke(IPC.fixtureExport, fixture),
     import: () => ipcRenderer.invoke(IPC.fixtureImport)
+  },
+  asr: {
+    pickAudio: () => ipcRenderer.invoke(IPC.asrPickAudio),
+    saveTemp: (base64: string, fileName: string) =>
+      ipcRenderer.invoke(IPC.asrSaveTemp, { base64, fileName }),
+    loadAsset: (filePath: string) => ipcRenderer.invoke(IPC.asrLoadAsset, filePath),
+    transcribe: (request: AsrTranscribeRequest) =>
+      ipcRenderer.invoke(IPC.asrTranscribe, { requestId: crypto.randomUUID(), request }),
+    batch: (request, filePaths) => ipcRenderer.invoke(IPC.asrBatch, { request, filePaths }),
+    probeLocal: () => ipcRenderer.invoke(IPC.asrProbeLocal),
+    runs: {
+      list: () => ipcRenderer.invoke(IPC.asrRunsList),
+      save: (run: AsrRun) => ipcRenderer.invoke(IPC.asrRunsSave, run),
+      delete: (runId: string) => ipcRenderer.invoke(IPC.asrRunsDelete, runId)
+    },
+    fixture: {
+      export: (fixture: AsrFixture) => ipcRenderer.invoke(IPC.asrFixtureExport, fixture),
+      import: () => ipcRenderer.invoke(IPC.asrFixtureImport)
+    }
   }
 }
 

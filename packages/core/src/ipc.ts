@@ -1,4 +1,12 @@
 import type { AppSettings, ProviderId, ProviderStatus } from './settings'
+import type {
+  AsrAudioAsset,
+  AsrBatchItem,
+  AsrFixture,
+  AsrRun,
+  AsrTranscribeRequest,
+  AsrTranscribeResult
+} from './asr'
 import type { LLMChatRequest, LLMChatResult, LLMFixture, LLMSession } from './llm'
 
 export const IPC = {
@@ -15,7 +23,18 @@ export const IPC = {
   sessionsSave: 'sessions:save',
   sessionsDelete: 'sessions:delete',
   fixtureExport: 'fixture:export',
-  fixtureImport: 'fixture:import'
+  fixtureImport: 'fixture:import',
+  asrPickAudio: 'asr:pick-audio',
+  asrSaveTemp: 'asr:save-temp',
+  asrLoadAsset: 'asr:load-asset',
+  asrTranscribe: 'asr:transcribe',
+  asrBatch: 'asr:batch',
+  asrProbeLocal: 'asr:probe-local',
+  asrRunsList: 'asr:runs-list',
+  asrRunsSave: 'asr:runs-save',
+  asrRunsDelete: 'asr:runs-delete',
+  asrFixtureExport: 'asr:fixture-export',
+  asrFixtureImport: 'asr:fixture-import'
 } as const
 
 export type CredentialsSetPayload = {
@@ -83,5 +102,25 @@ export type CallisterBridge = {
   fixture: {
     export: (fixture: LLMFixture) => Promise<string>
     import: () => Promise<LLMFixture | null>
+  }
+  asr: {
+    pickAudio: () => Promise<string | null>
+    saveTemp: (base64: string, fileName: string) => Promise<string>
+    loadAsset: (filePath: string) => Promise<AsrAudioAsset>
+    transcribe: (request: AsrTranscribeRequest) => Promise<AsrTranscribeResult>
+    batch: (
+      request: Omit<AsrTranscribeRequest, 'filePath' | 'fileName'>,
+      filePaths: string[]
+    ) => Promise<AsrBatchItem[]>
+    probeLocal: () => Promise<boolean>
+    runs: {
+      list: () => Promise<AsrRun[]>
+      save: (run: AsrRun) => Promise<AsrRun[]>
+      delete: (runId: string) => Promise<AsrRun[]>
+    }
+    fixture: {
+      export: (fixture: AsrFixture) => Promise<string>
+      import: () => Promise<AsrFixture | null>
+    }
   }
 }

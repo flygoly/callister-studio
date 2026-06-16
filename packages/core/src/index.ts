@@ -7,7 +7,22 @@ export type {
   ProviderStatus,
   ThemeMode
 } from './settings'
-export { DEFAULT_SETTINGS } from './settings'
+export { DEFAULT_SETTINGS, DEFAULT_ASR_SETTINGS } from './settings'
+export type {
+  AsrProviderId,
+  AsrProviderSettings,
+  AsrSettings
+} from './settings'
+export type {
+  AsrAudioAsset,
+  AsrBatchItem,
+  AsrFixture,
+  AsrMetrics,
+  AsrRun,
+  AsrSegment,
+  AsrTranscribeRequest,
+  AsrTranscribeResult
+} from './asr'
 export type {
   LLMChatMetrics,
   LLMChatRequest,

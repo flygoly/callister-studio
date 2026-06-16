@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import type { ProviderId } from '@callister/core'
-import { Button, Input, Panel, StatusBadge } from '@callister/ui'
+import type { AsrProviderId, ProviderId } from '@callister/core'
+import { Button, Input, Panel, Select, StatusBadge } from '@callister/ui'
 import { callister } from '../lib/callister'
 import { useAppStore } from '../stores/useAppStore'
 import { ThemeToggle } from '../components/ThemeToggle'
 
 const providerOrder: ProviderId[] = ['openai', 'anthropic', 'ollama']
+const asrProviderOrder: AsrProviderId[] = ['openai', 'local']
 
 export function SettingsPage() {
   const settings = useAppStore((state) => state.settings)
@@ -18,9 +19,11 @@ export function SettingsPage() {
     ollama: ''
   })
   const [message, setMessage] = useState('')
+  const [localWhisperAvailable, setLocalWhisperAvailable] = useState(false)
 
   useEffect(() => {
     void refreshProviderStatus()
+    void callister.asr.probeLocal().then(setLocalWhisperAvailable)
   }, [refreshProviderStatus])
 
   const saveProvider = async (providerId: ProviderId) => {
@@ -152,6 +155,134 @@ export function SettingsPage() {
                   </Button>
                 ) : null}
               </div>
+            </div>
+          </Panel>
+        )
+      })}
+
+      <Panel title="ASR (Speech-to-Text)">
+        <div className="settings-grid">
+          <Select
+            label="Default provider"
+            value={settings.asr.defaultProvider}
+            options={[
+              { value: 'openai', label: 'OpenAI Whisper' },
+              { value: 'local', label: 'faster-whisper (local)' }
+            ]}
+            onChange={(event) =>
+              updateSettings({
+                ...settings,
+                asr: {
+                  ...settings.asr,
+                  defaultProvider: event.target.value as AsrProviderId
+                }
+              })
+            }
+          />
+        </div>
+      </Panel>
+
+      {asrProviderOrder.map((providerId) => {
+        const asrProvider = settings.asr.providers[providerId]
+        const label = providerId === 'openai' ? 'OpenAI Whisper' : 'faster-whisper (local)'
+
+        return (
+          <Panel key={providerId} title={label}>
+            <div className="settings-grid">
+              <div className="settings-row">
+                <StatusBadge tone={asrProvider.enabled ? 'success' : 'neutral'}>
+                  {asrProvider.enabled ? 'Enabled' : 'Disabled'}
+                </StatusBadge>
+                {providerId === 'openai' ? (
+                  <StatusBadge tone={providerStatus.find((p) => p.id === 'openai')?.configured ? 'success' : 'warning'}>
+                    {providerStatus.find((p) => p.id === 'openai')?.configured
+                      ? 'API key configured'
+                      : 'Needs OpenAI API key'}
+                  </StatusBadge>
+                ) : (
+                  <StatusBadge tone={localWhisperAvailable ? 'success' : 'warning'}>
+                    {localWhisperAvailable ? 'CLI found' : 'faster-whisper not in PATH'}
+                  </StatusBadge>
+                )}
+              </div>
+
+              <label className="settings-checkbox">
+                <input
+                  type="checkbox"
+                  checked={asrProvider.enabled}
+                  onChange={(event) =>
+                    updateSettings({
+                      ...settings,
+                      asr: {
+                        ...settings.asr,
+                        providers: {
+                          ...settings.asr.providers,
+                          [providerId]: { ...asrProvider, enabled: event.target.checked }
+                        }
+                      }
+                    })
+                  }
+                />
+                Enable provider
+              </label>
+
+              <Input
+                label="Model"
+                value={asrProvider.model}
+                onChange={(event) =>
+                  updateSettings({
+                    ...settings,
+                    asr: {
+                      ...settings.asr,
+                      providers: {
+                        ...settings.asr.providers,
+                        [providerId]: { ...asrProvider, model: event.target.value }
+                      }
+                    }
+                  })
+                }
+              />
+
+              <Input
+                label="Language"
+                placeholder="auto"
+                value={asrProvider.language}
+                onChange={(event) =>
+                  updateSettings({
+                    ...settings,
+                    asr: {
+                      ...settings.asr,
+                      providers: {
+                        ...settings.asr.providers,
+                        [providerId]: { ...asrProvider, language: event.target.value }
+                      }
+                    }
+                  })
+                }
+              />
+
+              {providerId === 'openai' ? (
+                <Input
+                  label="Base URL"
+                  value={asrProvider.baseUrl ?? settings.providers.openai.baseUrl}
+                  onChange={(event) =>
+                    updateSettings({
+                      ...settings,
+                      asr: {
+                        ...settings.asr,
+                        providers: {
+                          ...settings.asr.providers,
+                          openai: { ...asrProvider, baseUrl: event.target.value }
+                        }
+                      }
+                    })
+                  }
+                />
+              ) : (
+                <p className="settings-hint">
+                  Install faster-whisper and ensure the CLI is available in your PATH.
+                </p>
+              )}
             </div>
           </Panel>
         )

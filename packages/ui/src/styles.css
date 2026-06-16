@@ -161,3 +161,31 @@
     grid-template-columns: 1fr;
   }
 }
+
+.cs-audio-player {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.cs-waveform {
+  position: relative;
+  margin-top: 12px;
+}
+
+.cs-waveform canvas {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.cs-waveform__hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cs-text-muted);
+  font-size: 12px;
+  pointer-events: none;
+}

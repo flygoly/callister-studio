@@ -1,5 +1,6 @@
 import Store from 'electron-store'
 import {
+  DEFAULT_ASR_SETTINGS,
   DEFAULT_SETTINGS,
   type AppSettings,
   type ProviderId,
@@ -19,7 +20,20 @@ const providerLabels: Record<ProviderId, string> = {
 }
 
 export function getSettings(): AppSettings {
-  return store.get('settings')
+  const stored = store.get('settings')
+  return {
+    ...DEFAULT_SETTINGS,
+    ...stored,
+    providers: { ...DEFAULT_SETTINGS.providers, ...stored.providers },
+    asr: {
+      ...DEFAULT_ASR_SETTINGS,
+      ...stored.asr,
+      providers: {
+        ...DEFAULT_ASR_SETTINGS.providers,
+        ...stored.asr?.providers
+      }
+    }
+  }
 }
 
 export function setSettings(settings: AppSettings): AppSettings {
