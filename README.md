@@ -25,17 +25,17 @@ Callister Studio is an open-source **desktop workbench** that makes AI processes
 
 ## Features (planned / in progress)
 
-Nothing is marked _Available_ yet. This project is in early development.
+| Module    | Debug & trace                   | Learn & visualize     | Status        |
+| --------- | ------------------------------- | --------------------- | ------------- |
+| LLM       | streaming, token stats, raw I/O | prompt experiments    | **Available** |
+| ASR       | waveform + timestamps           | transcript alignment  | **Available** |
+| TTS       | latency metrics                 | voice A/B comparison  | Planned       |
+| NLP       | tokenization view               | embeddings explorer   | Planned       |
+| Agent     | tool-call timeline              | step-by-step loop     | Planned       |
+| OCR / CV  | bounding boxes                  | confidence overlays   | Planned       |
+| Pipelines | end-to-end trace                | chain ASR → LLM → TTS | Planned       |
 
-| Module    | Debug & trace                   | Learn & visualize     |
-| --------- | ------------------------------- | --------------------- |
-| LLM       | streaming, token stats, raw I/O | prompt experiments    |
-| ASR       | waveform + timestamps           | transcript alignment  |
-| TTS       | latency metrics                 | voice A/B comparison  |
-| NLP       | tokenization view               | embeddings explorer   |
-| Agent     | tool-call timeline              | step-by-step loop     |
-| OCR / CV  | bounding boxes                  | confidence overlays   |
-| Pipelines | end-to-end trace                | chain ASR → LLM → TTS |
+**ASR providers:** OpenAI Whisper, faster-whisper (local), iFlytek IAT (short) and LFASR (long).
 
 Full phased checklist: [docs/ROADMAP.md](docs/ROADMAP.md)
 
@@ -43,7 +43,7 @@ Full phased checklist: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 <!-- TODO: add screenshots after Phase 1 app shell -->
 
-_Coming soon — UI is not built yet._
+_App shell, LLM playground, and ASR workbench are functional — screenshot gallery coming in Phase 11._
 
 ## Quick Start
 
@@ -71,18 +71,20 @@ Windows · macOS · Linux (via Electron)
 ## Tech stack
 
 - **Desktop:** Electron 33+
-- **UI:** React 18, TypeScript, Tailwind CSS, shadcn/ui
+- **UI:** React 18, TypeScript, custom `@callister/ui` components
 - **Build:** electron-vite, pnpm workspaces, Turborepo
-- **State:** Zustand, TanStack Query
+- **State:** Zustand
 
 Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## Project status
 
-**Early development.** Phase 0–2 are in place: monorepo shell, settings/credentials, and LLM playground with trace inspector.
+**Early development.** Phases 0–2 are complete; Phase 3 (ASR) is largely in place.
 
-- **Latest:** LLM playground with streaming, sessions, fixture export
+- **Available:** App shell, settings/credentials, LLM playground with trace inspector, ASR workbench with waveform and iFlytek integration
 - **Roadmap:** [docs/ROADMAP.md](docs/ROADMAP.md)
+- **v0.1.0 target:** app shell + LLM playground + trace inspector (met)
+- **v0.2.0 target:** ASR + TTS + one pipeline preset (ASR in progress)
 
 ## Contributing
 

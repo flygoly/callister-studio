@@ -1,9 +1,36 @@
 # Callister Studio — Roadmap
 
-Callister Studio is an open-source desktop workbench for **debugging, testing, visualizing, and learning** AI workflows. This document tracks phased development from repository setup through module playgrounds and release.
+Callister Studio is an open-source desktop workbench for **debugging, testing, visualizing, and learning** AI workflows. It helps you run a request, watch each step unfold, inspect raw payloads, and compare results across providers — across ASR, NLP, TTS, LLM, Agent, OCR, and CV.
+
+**What it is:** a local desktop tool that makes AI pipelines observable.
+
+**What it is not:** a production inference server, a chat-only client, or a model-training platform.
 
 **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md)  
 **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## UI layout (target)
+
+```mermaid
+flowchart LR
+  subgraph layout [AppLayout]
+    Sidebar[SidebarNav]
+    subgraph workspace [Workspace]
+      InputPanel[InputPanel]
+      OutputPanel[OutputPanel]
+      Inspector[TraceInspector]
+    end
+  end
+  Sidebar --> workspace
+```
+
+**Conventions:**
+
+- **Left sidebar:** module icons (Home, ASR, TTS, LLM, Agent, OCR, CV, NLP, Pipelines, Settings)
+- **Main workspace:** split panes — input (left/top), output (right/bottom)
+- **Trace inspector** (bottom panel): latency, tokens, headers, raw JSON, step timeline
+- **Top bar / provider area:** active provider selector, run/stop, export session
+- **Theme:** light/dark/system via CSS variables
 
 ## Tech stack (target)
 
@@ -89,6 +116,9 @@ Phase 0 (Tooling)
 - [x] Audio input: file upload (wav / mp3 / m4a), microphone record, drag-and-drop
 - [x] Waveform visualization + playback scrubber
 - [x] Providers: OpenAI Whisper API, faster-whisper (local via subprocess)
+- [x] Providers: iFlytek short speech (WebSocket IAT) and long speech (REST LFASR)
+- [x] Provider card navigation with per-vendor debug panels and API doc links
+- [x] iFlytek: credential inputs, short/long mode toggle, SDK code snippet generation
 - [x] Output: transcript, word / segment timestamps, confidence (when available)
 - [x] Overlay timestamps on waveform
 - [x] Compare two ASR runs side-by-side (diff view)
